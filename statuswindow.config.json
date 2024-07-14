@@ -1,0 +1,29 @@
+{
+    "window": {
+        "width": 150,
+        "height": 26,
+		"x": 0,
+		"y": -145,
+        "font": {
+            "name": "Consolas",
+            "size": 16
+        }
+    },
+    "matches": [
+        {
+            "regex": "INSERT",
+            "bgcolor": "#ABDA00",
+            "fgcolor": "#176E00"
+        },
+        {
+            "regex": "NORMAL",
+            "bgcolor": "#82AAFF",
+            "fgcolor": "#354160"
+        },
+		{
+            "regex": "NO FILE FOUND",
+            "bgcolor": "#222222",
+            "fgcolor": "#F04444"
+		}
+    ]
+}

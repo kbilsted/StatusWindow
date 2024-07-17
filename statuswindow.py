@@ -5,6 +5,7 @@ import re
 import sys
 import tempfile
 import signal
+import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -89,15 +90,14 @@ class AlwaysOnTopApp:
         self.update_content()
 
         # Set up file monitoring
+        self.update_scheduled = False
         event_handler = StateFileEventHandler(self)
         self.observer = Observer()
         self.observer.schedule(event_handler, os.path.dirname(self.statefilepath), recursive=False)
         self.observer.start()
 
-        # Handle Ctrl+C and Ctrl+Z if possible
-        signal.signal(signal.SIGINT, self.signal_handler)
-        if hasattr(signal, 'SIGTSTP'):
-            signal.signal(signal.SIGTSTP, self.signal_handler)
+        # Regularly check for Ctrl+C and Ctrl+Z signals
+        self.check_signals()
 
     def update_content(self):
         try:
@@ -127,13 +127,29 @@ class AlwaysOnTopApp:
         self.root.destroy()
         sys.exit(0)
 
+    def check_signals(self):
+        try:
+            # This method regularly calls itself
+            self.root.after(100, self.check_signals)
+        except (KeyboardInterrupt, SystemExit):
+            self.on_close()
+
+    def schedule_update(self):
+        if not self.update_scheduled:
+            self.update_scheduled = True
+            self.root.after(50, self.perform_update)
+
+    def perform_update(self):
+        self.update_content()
+        self.update_scheduled = False
+
 class StateFileEventHandler(FileSystemEventHandler):
     def __init__(self, app):
         self.app = app
 
     def on_modified(self, event):
         if event.src_path == self.app.statefilepath:
-            self.app.update_content()
+            self.app.schedule_update()
 
 if __name__ == "__main__":
     # Get the directory of the current script
